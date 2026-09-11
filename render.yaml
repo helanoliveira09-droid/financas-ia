@@ -1,0 +1,30 @@
+# ============================================================
+# render.yaml
+# ------------------------------------------------------------
+# "Blueprint" do Render: permite criar o serviço web automaticamente
+# a partir deste repositório, em vez de configurar tudo manualmente
+# pela interface. Basta ir em Render > New > Blueprint e apontar
+# para este repositório do GitHub.
+#
+# A variável MONGODB_URI precisa ser preenchida manualmente no
+# painel do Render (Environment > Add Environment Variable), pois
+# é uma credencial sensível e não deve ficar neste arquivo.
+# ============================================================
+
+services:
+  - type: web
+    name: financas-ia-dashboard
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false   # defina manualmente no painel do Render (não fica salvo no repositório)
+      - key: PORT
+        value: 10000  # o Render injeta sua própria porta automaticamente, isso é só um valor padrão

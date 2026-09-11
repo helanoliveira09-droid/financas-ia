@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro Inteligente</title>
+
+    <!-- ============================================================
+         Scripts de terceiros via CDN:
+         - Tailwind CSS: estilização utilitária
+         - Chart.js: gráficos de linha e pizza/doughnut
+         - brain.js: rede neural simples usada na aba "Inteligência Artificial"
+         ============================================================ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/brain.js"></script>
+
+    <!-- CSS Estilizado Interno -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
+        <!-- BARRA LATERAL -->
+        <aside class="w-full md:w-64 bg-gray-800 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-gray-700">
+            <div>
+                <h1 class="text-2xl font-bold text-emerald-400 mb-8 flex items-center gap-2">💰 FinançasIA</h1>
+                <nav class="space-y-3">
+                    <button onclick="mudarAba('geral')" id="btn-geral" class="w-full text-left py-3 px-4 rounded-lg bg-emerald-600 text-white font-medium transition-all">📊 Visão Geral</button>
+                    <button onclick="mudarAba('dados')" id="btn-dados" class="w-full text-left py-3 px-4 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition-all">📋 Dados Gerais</button>
+                    <button onclick="mudarAba('saldo')" id="btn-saldo" class="w-full text-left py-3 px-4 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition-all">✍️ Saldo Manual</button>
+                    <button onclick="mudarAba('investimentos')" id="btn-investimentos" class="w-full text-left py-3 px-4 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition-all">📈 Investimentos</button>
+                    <button onclick="mudarAba('ia')" id="btn-ia" class="w-full text-left py-3 px-4 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition-all">🧠 Inteligência Artificial</button>
+                </nav>
+            </div>
+            <div class="text-xs text-gray-500 pt-4 border-t border-gray-700">
+                Sistema Autônomo v2.0 · <span id="status-api">verificando API...</span>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+
+            <!-- ABA 1: VISÃO GERAL -->
+            <section id="aba-geral" class="space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-800 p-4 rounded-xl border border-gray-700 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Filtrar Mês</label>
+                        <select id="filtro-mes" onchange="atualizarDashboard()" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                            <option value="todos">Todos os Meses</option>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Limite Mensal de Gastos</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="input-limite" value="1500" class="w-32 bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-white">
+                            <button onclick="definirAlertaGasto()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm">Definir</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="banner-alerta" class="hidden p-4 rounded-xl font-medium flex items-center justify-between transition-all"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 card-glass">
+                        <p class="text-sm font-semibold text-gray-400">Total de Entradas</p>
+                        <p id="kpi-entradas" class="text-2xl font-bold text-emerald-400 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 card-glass">
+                        <p class="text-sm font-semibold text-gray-400">Total de Saídas</p>
+                        <p id="kpi-saidas" class="text-2xl font-bold text-rose-400 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 card-glass">
+                        <p class="text-sm font-semibold text-gray-400">Ajustes de Saldo Manual</p>
+                        <p id="kpi-saldo-manual" class="text-2xl font-bold text-sky-400 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 card-glass">
+                        <p class="text-sm font-semibold text-gray-400">Saldo Acumulado</p>
+                        <p id="kpi-saldo" class="text-2xl font-bold text-white mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-emerald-500 bg-emerald-950/20 card-glass">
+                        <p class="text-sm font-semibold text-emerald-400">Meta Alvo</p>
+                        <p id="kpi-meta" class="text-2xl font-bold text-emerald-300 mt-2">R$ 5.000,00</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 text-gray-200">Linha de Base para Meta</h3>
+                        <div class="h-64"><canvas id="graficoLinhaBase"></canvas></div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 text-gray-200">Categorias de Gastos</h3>
+                        <div class="h-64"><canvas id="graficoCategorias"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 2: DADOS GERAIS -->
+            <section id="aba-dados" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
+                        <h3 class="text-lg font-bold mb-4 text-emerald-400">Nova Movimentação</h3>
+                        <form id="form-transacao" onsubmit="adicionarTransacao(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Mês</label>
+                                <select id="form-mes" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Tipo</label>
+                                <select id="form-tipo" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                                    <option value="entrada">Entrada</option>
+                                    <option value="saida">Saída</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Categoria</label>
+                                <select id="form-categoria" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                                    <option value="Salário/Renda">Salário ou Renda Extra</option>
+                                    <option value="Alimentação">Alimentação</option>
+                                    <option value="Moradia">Moradia</option>
+                                    <option value="Transporte">Transporte</option>
+                                    <option value="Lazer">Lazer</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Valor (R$)</label>
+                                <input type="number" step="0.01" id="form-valor" required placeholder="0,00" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 text-white font-bold p-3 rounded-lg">Salvar</button>
+                            <button type="button" onclick="limparHistorico()" class="w-full bg-rose-600 text-white font-bold p-2 rounded-lg">Limpar Histórico</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 lg:col-span-2 flex flex-col">
+                        <h3 class="text-lg font-bold mb-4 text-gray-200">Histórico</h3>
+                        <div class="overflow-x-auto max-h-[400px]">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-700 text-gray-400 text-sm">
+                                        <th class="p-3">Mês</th>
+                                        <th class="p-3">Tipo</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3 text-right">Valor</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-corpo" class="divide-y divide-gray-700 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 3: SALDO MANUAL (nova aba) -->
+            <section id="aba-saldo" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
+                        <h3 class="text-lg font-bold mb-2 text-sky-400">Entrada de Saldo Manual</h3>
+                        <p class="text-xs text-gray-400 mb-4">
+                            Use esta área para corrigir ou definir o saldo acumulado manualmente
+                            (ex: saldo inicial de uma conta). O valor pode ser positivo (soma) ou
+                            negativo (subtrai) do saldo total.
+                        </p>
+                        <form id="form-saldo-manual" onsubmit="adicionarSaldoManual(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Descrição</label>
+                                <input type="text" id="saldo-descricao" required placeholder="Ex: Saldo inicial em conta" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Valor (R$)</label>
+                                <input type="number" step="0.01" id="saldo-valor" required placeholder="Use negativo para subtrair" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white">
+                            </div>
+                            <button type="submit" class="w-full bg-sky-600 text-white font-bold p-3 rounded-lg">Adicionar Ajuste</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 lg:col-span-2 flex flex-col">
+                        <h3 class="text-lg font-bold mb-4 text-gray-200">Ajustes Manuais Cadastrados</h3>
+                        <div class="overflow-x-auto max-h-[400px]">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-700 text-gray-400 text-sm">
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Descrição</th>
+                                        <th class="p-3 text-right">Valor</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-saldo-manual" class="divide-y divide-gray-700 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 4: INVESTIMENTOS -->
+            <section id="aba-investimentos" class="hidden space-y-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h3 class="text-xl font-bold text-amber-400 mb-2">Simulador de Investimento (1% ao Mês)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm divide-y divide-gray-700">
+                                <thead>
+                                    <tr class="text-gray-400 border-b border-gray-700">
+                                        <th class="p-3">Período</th>
+                                        <th class="p-3">Saldo Base</th>
+                                        <th class="p-3">Rendimento</th>
+                                        <th class="p-3 text-right">Montante Final</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-investimentos" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <div class="bg-gray-900 p-6 rounded-xl text-center">
+                            <p class="text-sm font-semibold uppercase text-amber-400">Total Ganho em Juros</p>
+                            <p id="total-juros" class="text-4xl font-extrabold text-white mt-2">R$ 0,00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 5: INTELIGÊNCIA ARTIFICIAL -->
+            <section id="aba-ia" class="hidden space-y-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h3 class="text-xl font-bold text-purple-400 mb-2">Machine Learning Autônomo</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-gray-300 text-sm">Status do Modelo</h4>
+                            <p id="ia-status" class="text-emerald-400 font-semibold mt-2">● Treinado e Ativo</p>
+                        </div>
+                        <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-gray-300 text-sm">Sugestão de Gasto Máximo</h4>
+                            <p id="ia-sugestao-gasto" class="text-2xl font-black text-purple-300 mt-2">R$ 0,00</p>
+                        </div>
+                        <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-gray-300 text-sm">Poupança Obrigatória</h4>
+                            <p id="ia-sugestao-guardar" class="text-2xl font-black text-blue-300 mt-2">R$ 0,00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Lógica da aplicação (separada do HTML para facilitar manutenção) -->
+    <script src="js/app.js"></script>
+</body>
+</html>
