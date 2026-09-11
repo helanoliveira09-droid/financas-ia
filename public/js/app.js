@@ -109,6 +109,45 @@ async function adicionarTransacao(event) {
     }
 }
 
+/** Consulta a IA via API para analisar finanças e dar sugestões. */
+document.getElementById('btn-perguntar-ia').addEventListener('click', async () => {
+    const pergunta = document.getElementById('ia-pergunta').value;
+    const btn = document.getElementById('btn-perguntar-ia');
+    const containerResposta = document.getElementById('ia-resposta-container');
+    const textoResposta = document.getElementById('ia-resposta-texto');
+
+    if (!pergunta.trim()) {
+        alert('Por favor, digite uma pergunta ou informe o que comprou.');
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.innerText = 'Pensando...';
+        containerResposta.classList.add('hidden');
+
+        // Faz a requisição para a rota criada no seu back-end Node.js
+        const response = await fetch('/api/ia/consultar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pergunta: pergunta })
+        });
+
+        const data = await response.json();
+        
+        // Exibe a resposta formatada na tela
+        textoResposta.innerText = data.resposta;
+        containerResposta.classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Erro ao consultar IA:', error);
+        alert('Ocorreu um erro ao falar com a IA.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Analisar Finanças com IA';
+    }
+});
+
 /** Remove uma transação específica pelo ID. */
 async function removerTransacao(id) {
     if (!confirm('Remover esta transação?')) return;

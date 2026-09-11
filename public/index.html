@@ -275,6 +275,25 @@
         </main>
     </div>
 
+<!-- Interface de Chat com a IA -->
+<div class="bg-gray-800 p-6 rounded-x1 border border-gray-700 mt-6">
+    <h3 class="text-xl font-bold text-purple-400 mb-4">Consultoria de Investimentos IA</h3>
+    
+    <div class="space-y-4">
+        <textarea id="ia-pergunta" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-white" rows="3" placeholder="Ex: Comprei um tênis por R$300. O que devo cortar no meu orçamento para começar a investir?"></textarea>
+        
+        <button id="btn-perguntar-ia" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg w-full transition">
+            Analisar Finanças com IA
+        </button>
+    </div>
+
+    <!-- Resposta da IA -->
+    <div id="ia-resposta-container" class="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-lg hidden">
+        <h4 class="font-bold text-gray-300 text-sm mb-2">Recomendação da IA:</h4>
+        <p id="ia-resposta-texto" class="text-gray-200 text-sm leading-relaxed whitespace-pre-line"></p>
+    </div>
+</div>
+
     <!-- Lógica da aplicação (separada do HTML para facilitar manutenção) -->
     <script src="js/app.js"></script>
 </body>
