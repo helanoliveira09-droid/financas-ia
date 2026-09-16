@@ -89,9 +89,6 @@ const rotasIA = require('./routes/ia');
 // 2. Registra a rota da IA no Express
 app.use('/', rotasIA);
 
-// 3. Configuração da porta e inicialização (Apenas uma vez)
-const PORTA = process.env.PORT || 3000;
-
 async function iniciar() {
     await conectarBancoDeDados();
     
