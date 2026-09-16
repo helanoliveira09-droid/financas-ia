@@ -1,34 +1,24 @@
 const express = require('express');
-const router = express.Router();
-const { GoogleGenAI } = require('@google/genai');
+// ... mantenha as outras importações padrão que já existem aqui (como cors, path, etc.) ...
 
-// Inicializa a IA usando sua chave de ambiente privada
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// 1. PRIMEIRO: Cria a instância do app (Geralmente está na linha 3 ou 4)
+const app = express();
 
-router.post('/consultar', async (req, res) => {
-    try {
-        const { pergunta } = req.body; 
+// 2. SEGUNDO: Importa e registra as rotas da IA (Abaixo da criação do app)
+const rotasIA = require('./routes/ia');
+app.use('/api', rotasIA);
 
-        if (!pergunta) {
-            return res.status(400).json({ error: "A pergunta não foi fornecida." });
-        }
+// ... o restante do seu código (outras rotas, banco de dados e a função iniciar) 
 
-        // Configura o modelo para pesquisar dados dinâmicos da internet
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: pergunta,
-            config: {
-                // Ativa a ferramenta nativa de busca do Google (Search Grounding)
-                tools: [{ googleSearch: {} }]
-            }
-        });
+// Configuração da porta única
+const PORTA = process.env.PORT || 3000;
 
-        res.json({ resposta: response.text });
+async function iniciar() {
+    await conectarBancoDeDados();
+    
+    app.listen(PORTA, () => {
+        console.log(`🚀 Servidor rodando em http://localhost:${PORTA}`);
+    });
+}
 
-    } catch (error) {
-        console.error("Erro na comunicação com o Gemini Conectado:", error);
-        res.status(500).json({ error: "Erro interno ao consultar a IA." });
-    }
-});
-
-module.exports = router;
+iniciar();

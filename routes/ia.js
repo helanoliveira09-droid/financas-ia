@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
 
+// Criamos uma função para inicializar o Gemini apenas quando houver requisição
+function obterInstanciaGemini() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error("Chave de API do Gemini não configurada.");
+    }
+    return new GoogleGenAI({ apiKey: apiKey });
+}
+
 router.post('/consultar', async (req, res) => {
     try {
         const { pergunta } = req.body;
@@ -10,13 +19,14 @@ router.post('/consultar', async (req, res) => {
             return res.status(400).json({ error: "A pergunta não foi fornecida." });
         }
 
-        const apiKey = process.env.GEMINI_API_KEY;
-
-        if (!apiKey) {
-            return res.status(500).json({ error: "Chave de API do Gemini não configurada no servidor." });
+        // Tenta obter a instância da IA de forma protegida
+        let ai;
+        try {
+            ai = obterInstanciaGemini();
+        } catch (erroChave) {
+            console.error("⚠️ Configuração pendente:", erroChave.message);
+            return res.status(500).json({ error: "Serviço temporariamente indisponível: Chave de API ausente." });
         }
-
-        const ai = new GoogleGenAI({ apiKey: apiKey });
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
