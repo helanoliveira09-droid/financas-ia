@@ -1,6 +1,6 @@
 const express = require('express');
 // 1. Importa a função do banco de dados (que estava faltando)
-const { conectarBancoDeDados } = require('./config/db'); 
+const conectarBancoDeDados = require('./config/db'); 
 
 // 2. Cria a instância do Express
 const app = express();
