@@ -1,10 +1,11 @@
 const express = require('express');
-// ... mantenha as outras importações padrão que já existem aqui (como cors, path, etc.) ...
+// 1. Importa a função do banco de dados (que estava faltando)
+const { conectarBancoDeDados } = require('./config/db'); 
 
-// 1. PRIMEIRO: Cria a instância do app (Geralmente está na linha 3 ou 4)
+// 2. Cria a instância do Express
 const app = express();
 
-// 2. SEGUNDO: Importa e registra as rotas da IA (Abaixo da criação do app)
+// 3. Importa e registra as rotas da IA
 const rotasIA = require('./routes/ia');
 app.use('/api', rotasIA);
 
