@@ -127,13 +127,14 @@ document.getElementById('btn-perguntar-ia').addEventListener('click', async () =
         containerResposta.classList.add('hidden');
 
         // Faz a requisição para a rota criada no seu back-end Node.js
-        const response = await fetch('/api/ia/consultar', {
+         const data = await chamarApi('/consultar', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pergunta: pergunta })
         });
 
-        const data = await response.json();
+        // Exibe a resposta formatada na tela
+        textoResposta.innerText = data.resposta;
+        containerResposta.classList.remove('hidden');
         
         // Exibe a resposta formatada na tela
         textoResposta.innerText = data.resposta;

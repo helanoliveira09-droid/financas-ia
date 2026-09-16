@@ -85,9 +85,10 @@ async function iniciar() {
   });
 // 1. Importa a rota da IA
 const rotasIA = require('./routes/ia');
+app.use('/api', rotasIA);
 
-// 2. Registra a rota da IA no Express
-app.use('/', rotasIA);
+// 2. CONFIGURAÇÃO DA PORTA E INICIALIZAÇÃO (Mantenha como está abaixo)
+const PORTA = process.env.PORT || 3000;
 
 async function iniciar() {
     await conectarBancoDeDados();
@@ -95,7 +96,6 @@ async function iniciar() {
     app.listen(PORTA, () => {
         console.log(`Servidor rodando em http://localhost:${PORTA}`);
     });
-}
-}
+}}
 
 iniciar();
