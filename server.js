@@ -77,23 +77,18 @@ app.use((err, req, res, next) => {
 // ------------------------------------------------------------
 const PORTA = process.env.PORT || 3000;
 
-async function iniciar() {
-  await conectarBancoDeDados();
-
-  };
 // 1. Importa a rota da IA
 const rotasIA = require('./routes/ia');
 app.use('/api', rotasIA);
 
-// 2. CONFIGURAÇÃO DA PORTA E INICIALIZAÇÃO (Mantenha como está abaixo)
-
-
+// 2. FUNÇÃO ÚNICA DE INICIALIZAÇÃO
 async function iniciar() {
     await conectarBancoDeDados();
     
     app.listen(PORTA, () => {
-        console.log(`Servidor rodando em http://localhost:${PORTA}`);
+        console.log(`🚀 Servidor rodando em http://localhost:${PORTA}`);
     });
 }
 
+// 3. EXECUÇÃO
 iniciar();
