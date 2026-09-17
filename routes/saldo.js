@@ -16,8 +16,8 @@ const {
 // POST   /api/saldo-manual      -> cria um novo ajuste manual de saldo
 // DELETE /api/saldo-manual/:id  -> remove um ajuste manual específico
 
-router.get('/', listarSaldoManual);
-router.post('/', criarSaldoManual);
-router.delete('/:id', removerSaldoManual);
+router.get('/saldo-manual', listarSaldoManual);
+router.post('/saldo-manual', criarSaldoManual);
+router.delete('/saldo-manual/:id', removerSaldoManual);
 
 module.exports = router;
