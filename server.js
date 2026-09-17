@@ -16,6 +16,16 @@ app.use(express.static('public')); // Entrega a pasta public (HTML, CSS, JS) par
 const rotasIA = require('./routes/ia');
 app.use('/api', rotasIA);
 
+// 2. ADICIONE AS ROTAS DO SISTEMA QUE ESTAVAM FALTANDO:
+const rotasTransacoes = require('./routes/transacoes');
+const rotasSaldo = require('./routes/saldo');
+const rotasConfig = require('./routes/config');
+
+// Registra as rotas sob o mesmo prefixo da API do seu front-end
+app.use('/api', rotasTransacoes);
+app.use('/api', rotasSaldo);
+app.use('/api', rotasConfig);
+
 // Configuração da porta única
 const PORTA = process.env.PORT || 3000;
 
