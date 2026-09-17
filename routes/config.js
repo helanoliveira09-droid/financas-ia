@@ -12,7 +12,7 @@ const { obterConfig, atualizarConfig } = require('../controllers/configControlle
 // GET /api/config -> retorna a configuração atual
 // PUT /api/config -> atualiza limite e/ou meta
 
-router.get('/', obterConfig);
-router.put('/', atualizarConfig);
+router.get('/config', obterConfig);
+router.put('/config', atualizarConfig);
 
 module.exports = router;
