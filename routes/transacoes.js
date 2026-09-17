@@ -20,9 +20,9 @@ const {
 // DELETE /api/transacoes         -> limpa TODO o histórico
 // DELETE /api/transacoes/:id     -> remove uma transação específica
 
-router.get('/', listarTransacoes);
-router.post('/', criarTransacao);
-router.delete('/', limparTransacoes);
-router.delete('/:id', removerTransacao);
+router.get('/transacoes', listarTransacoes); // ajuste o nome da função se for diferente
+router.post('/transacoes', criarTransacao);
+router.delete('/transacoes', limparTransacoes);
+router.delete('/transacoes/:id', removerTransacao);
 
 module.exports = router;
