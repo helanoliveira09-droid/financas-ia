@@ -1,3 +1,7 @@
+const express = require('express');
+const router = express.Router();
+const { GoogleGenAI } = require('@google/genai');
+
 router.post('/consultar', async (req, res) => {
     try {
         const { pergunta } = req.body;
@@ -23,16 +27,17 @@ router.post('/consultar', async (req, res) => {
             }
         });
 
-        // IMPORTANTE: O novo SDK retorna o texto na propriedade 'text'
-        // Certifique-se de que o seu frontend (app.js) espera um JSON com a propriedade 'resposta'
+        // Retorna o texto na propriedade 'resposta' para o app.js ler
         return res.json({ resposta: response.text });
 
     } catch (error) {
         console.error("Erro interno no servidor IA:", error);
-        // Retorna o erro real no formato JSON para você ler no navegador se algo falhar
         return res.status(500).json({ 
             error: "Erro ao processar a requisição da IA.", 
             details: error.message 
         });
     }
 });
+
+// NÃO ESQUEÇA DESTA LINHA NO FINAL DO ARQUIVO:
+module.exports = router;
