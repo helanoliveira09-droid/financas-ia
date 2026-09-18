@@ -19,11 +19,12 @@ router.post('/consultar', async (req, res) => {
         const ai = new GoogleGenAI({ apiKey: apiKey });
 
         // Chamada oficial corrigida para o pacote @google/genai
+      // Chamada oficial corrigida com o modelo atualizado e disponível
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: String(pergunta), // Garante que é uma string de texto pura
+            model: 'gemini-1.5-flash', // ALTERADO DE 2.5 PARA 1.5
+            contents: String(pergunta), 
             config: {
-                tools: [{ googleSearch: {} }] // Mantém a busca em tempo real ativa
+                tools: [{ googleSearch: {} }] 
             }
         });
 
