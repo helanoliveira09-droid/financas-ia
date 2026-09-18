@@ -1,7 +1,3 @@
-const express = require('express');
-const router = express.Router();
-const { GoogleGenAI } = require('@google/genai');
-
 router.post('/consultar', async (req, res) => {
     try {
         const { pergunta } = req.body;
@@ -15,38 +11,28 @@ router.post('/consultar', async (req, res) => {
             return res.status(500).json({ error: "Chave de API do Gemini não configurada no Render." });
         }
 
+        // Inicializa o SDK com a chave correta
         const ai = new GoogleGenAI({ apiKey: apiKey });
 
-        // Chamada oficial estruturada para o Gemini 2.5 Flash
-const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: pergunta, // Certifique-se de que 'pergunta' chega como uma String pura do frontend
-    config: {
-        // Ativa a busca em tempo real no Google
-        tools: [{ googleSearch: {} }]
-    }
-});
+        // Chamada oficial corrigida para o pacote @google/genai
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: String(pergunta), // Garante que é uma string de texto pura
+            config: {
+                tools: [{ googleSearch: {} }] // Mantém a busca em tempo real ativa
+            }
+        });
 
-// Para enviar a resposta de volta ao frontend, lembre-se de pegar o texto final:
-return res.json({ resposta: response.text });
-
-        // O SDK atualizado retorna o texto diretamente em response.text
-        if (response && response.text) {
-            return res.json({ resposta: response.text });
-        } 
-        
-        // Tratamento de segurança caso a resposta venha em outro formato do modelo
-        const textoAlternativo = response.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (textoAlternativo) {
-            return res.json({ resposta: textoAlternativo });
-        }
-
-        throw new Error("O modelo não retornou um formato de texto válido.");
+        // IMPORTANTE: O novo SDK retorna o texto na propriedade 'text'
+        // Certifique-se de que o seu frontend (app.js) espera um JSON com a propriedade 'resposta'
+        return res.json({ resposta: response.text });
 
     } catch (error) {
-        console.error("Erro detalhado na rota da IA:", error);
-        res.status(500).json({ error: "Erro interno ao processar a resposta da IA." });
+        console.error("Erro interno no servidor IA:", error);
+        // Retorna o erro real no formato JSON para você ler no navegador se algo falhar
+        return res.status(500).json({ 
+            error: "Erro ao processar a requisição da IA.", 
+            details: error.message 
+        });
     }
 });
-
-module.exports = router;
