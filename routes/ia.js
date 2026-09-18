@@ -18,14 +18,17 @@ router.post('/consultar', async (req, res) => {
         const ai = new GoogleGenAI({ apiKey: apiKey });
 
         // Chamada oficial estruturada para o Gemini 2.5 Flash
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: pergunta,
-            config: {
-                // Ativa a busca em tempo real no Google
-                tools: [{ googleSearch: {} }]
-            }
-        });
+const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: pergunta, // Certifique-se de que 'pergunta' chega como uma String pura do frontend
+    config: {
+        // Ativa a busca em tempo real no Google
+        tools: [{ googleSearch: {} }]
+    }
+});
+
+// Para enviar a resposta de volta ao frontend, lembre-se de pegar o texto final:
+return res.json({ resposta: response.text });
 
         // O SDK atualizado retorna o texto diretamente em response.text
         if (response && response.text) {
