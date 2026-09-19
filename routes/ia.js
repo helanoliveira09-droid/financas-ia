@@ -21,7 +21,7 @@ router.post('/consultar', async (req, res) => {
         // Chamada oficial corrigida para o pacote @google/genai
       // Chamada oficial corrigida com o modelo atualizado e disponível
         const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash', // ALTERADO DE 2.5 PARA 1.5
+            model: 'gemini-2.5-flash', // O pacote mais recente gerencia este identificador nativamente
             contents: String(pergunta), 
             config: {
                 tools: [{ googleSearch: {} }] 
