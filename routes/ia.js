@@ -32,10 +32,9 @@ router.post('/consultar', async (req, res) => {
         return res.json({ resposta: response.text });
 
     } catch (error) {
-        console.error("Erro interno no servidor IA:", error);
-        return res.status(500).json({ 
-            error: "Erro ao processar a requisição da IA.", 
-            details: error.message 
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: String(pergunta)
         });
     }
 });
