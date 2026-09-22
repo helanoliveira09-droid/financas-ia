@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenAI } = require('@google/genai');
+// Importa a biblioteca clássica e estável do Google
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 router.post('/consultar', async (req, res) => {
     try {
@@ -15,29 +16,24 @@ router.post('/consultar', async (req, res) => {
             return res.status(500).json({ error: "Chave de API do Gemini não configurada no Render." });
         }
 
-        // Inicializa o SDK com a chave correta
-        const ai = new GoogleGenAI({ apiKey: apiKey });
+        // Inicializa usando o método clássico
+        const genAI = new GoogleGenerativeAI(apiKey);
+        
+        // Seleciona o modelo estável de produção
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Chamada oficial corrigida para o pacote @google/genai
-      // Chamada oficial corrigida com o modelo atualizado e disponível
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash', // O pacote mais recente gerencia este identificador nativamente
-            contents: String(pergunta), 
-            config: {
-                tools: [{ googleSearch: {} }] 
-            }
-        });
+        // Executa a geração de conteúdo de forma simples
+        const result = await model.generateContent(String(pergunta));
+        const responseText = result.response.text();
 
-        // Retorna o texto na propriedade 'resposta' para o app.js ler
-        return res.json({ resposta: response.text });
+        // Retorna a resposta estruturada para o seu app.js frontend
+        return res.json({ resposta: responseText });
 
     } catch (error) {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: String(pergunta)
+        console.error("Erro interno no servidor IA (Método Alternativo):", error);
+        return res.status(500).json({ 
+            error: "Erro ao processar a requisição da IA alternativa.", 
+            details: error.message 
         });
     }
 });
-
-// NÃO ESQUEÇA DESTA LINHA NO FINAL DO ARQUIVO:
-module.exports = router;
