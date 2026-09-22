@@ -17,10 +17,10 @@ router.post('/consultar', async (req, res) => {
         }
 
         // Inicializa usando o método clássico
-        const genAI = new GoogleGenerativeAI(apiKey);
+       const genAI = new GoogleGenerativeAI(apiKey);
         
-        // Seleciona o modelo estável de produção
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // ALTERADO: Adicionado "-latest" para compatibilidade com a rota v1beta
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
         // Executa a geração de conteúdo de forma simples
         const result = await model.generateContent(String(pergunta));
